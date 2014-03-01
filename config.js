@@ -48,15 +48,15 @@
                                 value[key] = value[key] || {};
                                 return flattenKeys(keys, value[key]);
                             }
-                            // if (keyValue) {
+                            keyValue = (keyValue === '{}') ? {} : keyValue;
                             var arrayVal = isArray.exec(keyValue);
                             keyValue = arrayVal ? JSON.parse(arrayVal[1]) : keyValue;
-                            // }
                             value[key] = keyValue;
                         })(keySplit, value);
                     }
                 }
             } else {
+                value = (value === '{}') ? {} : value;
                 var arrayVal = isArray.exec(value);
                 value = arrayVal ? JSON.parse(arrayVal[1]) : value;
             }
@@ -70,10 +70,15 @@
                 if (value && value.constructor === Array) {
                     value = 'Array(' + JSON.stringify(value) + ');';
                 }
-                else if (value === Object(value) && !isEmptyObject(value)) {
-                    for (var _key in value) {
-                        expandKeys(key + '.' + _key, value[_key]);
-                    } return;
+                else if (value === Object(value)) {
+                    if (!isEmptyObject(value)) {
+                        for (var _key in value) {
+                            expandKeys(key + '.' + _key, value[_key]);
+                        }
+                        return;
+                    } else {
+                        value = '{}';
+                    }
                 }
                 storage[key] = value;
             })(key, value);

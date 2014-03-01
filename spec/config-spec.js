@@ -41,7 +41,13 @@ describe('Basic test suite', function() {
     it('should set key with empty object', function() {
         var config = new Config();
         config.set('foo', {});
-        expect(config.storage.foo).toEqual({});
+        expect(config.get('foo')).toEqual({});
+    });
+
+    it('should set key with empty object', function() {
+        var config = new Config();
+        config.set('foo', {bar: {}});
+        expect(config.get('foo')).toEqual({bar: {}});
     });
 
     it('should set values using settings in constructor', function() {
