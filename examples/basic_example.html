@@ -1,0 +1,12 @@
+<html>
+<head>
+    <script src="../config.js"></script>
+</head>
+<body>
+    <script>
+        var settings = {foo: {bar: {baz: 'buzz'}}};
+        var config = new Config({}, settings);
+        console.log(config.get('foo.bar.baz')); // returns buzz
+    </script>
+</body>
+</html>

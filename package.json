@@ -1,0 +1,22 @@
+{
+  "name": "config",
+  "version": "1.0.0",
+  "description": "Config class allowing expanded dot key style access\"",
+  "author": "Marian Hello <marian.hello@mapilary.com> (http://www.mapilary.com)",
+  "homepage": "https://github.com/mapilary/config",
+  "main": "config.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "jasmine-node spec/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mapilary/config.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mapilary/config/issues"
+  },
+  "devDependencies": {
+    "jasmine-node": "*"
+  }
+}
