@@ -5,6 +5,14 @@ Config is tiny class, which allows to set and get values using dot syntax writte
 
 Motivation behind writing this was to have nice and readable configuration stored in localStorage, in favour of using JSON.stringify for persising objects.
 
+
+####Instead of one big string value:
+![](https://raw.github.com/mapilary/config/gh-pages/images/localstorage.png)
+
+####you can get this easy editable structure of key value(s):
+![](https://raw.github.com/mapilary/config/gh-pages/images/config.png)
+
+
 It can use javascript object (hashmap) as storage or localStorage as persistent storage,
 
 Works in environments:
@@ -53,11 +61,11 @@ Installation
 --------------
 ### Bower for use in browsers
 ```sh
-bower install https://github.com/mapilary/config
+bower install git://github.com/mapilary/config.git
 ```
 ### NPM for NodeJS
 ```sh
-npm install https://github.com/mapilary/config
+npm install git://github.com/mapilary/config.git
 ```
 ### Run tests
 ```sh
