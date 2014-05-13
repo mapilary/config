@@ -25,9 +25,10 @@ Changelog
 ---------
 
 1.1
-    - constructor now accepts options object and settings object
-    - added option prefix to avoid collision when using more applications on same domain
-    - remove method will also delete all nested sub keys
+===
+* constructor now accepts options object and settings object
+* added option prefix to avoid collision when using more applications on same domain
+* remove method will also delete all nested sub keys
 
 How to use
 ----------
