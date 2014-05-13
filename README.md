@@ -21,13 +21,16 @@ Works in environments:
 
 For using Config in Browser include script in html header or use as RequireJS module.
 
-Version
-----
+Changelog
+---------
 
-1.0
+1.1
+    - constructor now accepts options object and settings object
+    - added option prefix to avoid collision when using more applications on same domain
+    - remove method will also delete all nested sub keys
 
 How to use
---------------
+----------
 
 #### Simple usage scenario
 ```javascript
@@ -36,7 +39,7 @@ config.set('foo', {bar: {baz: 'buzz'}});
 config.get('foo.bar.baz'); // returns buzz
 ```
 
-#### Return partial key as object
+#### Return sub key as object
 ```javascript
 var config = new Config();
 config.set('foo', {bar: {baz: 'buzz'}});
@@ -45,7 +48,7 @@ config.get('foo'); // returns {bar: {baz: 'buzz'}}
 
 #### Using localStorage as persistent storage
 ```javascript
-var config = new Config(window.localStorage);
+var config = new Config({storage: window.localStorage});
 config.set('foo', {bar: {baz: 'buzz'}});
 config.get('foo.bar.baz'); // returns buzz
 ```
@@ -54,6 +57,20 @@ config.get('foo.bar.baz'); // returns buzz
 ```javascript
 var settings = {foo: {bar: {baz: 'buzz'}}};
 var config = new Config({}, settings);
+config.get('foo.bar.baz'); // returns buzz
+```
+
+#### Remove key(s)
+```javascript
+var settings = {foo: {bar: {baz: 'buzz'}}};
+var config = new Config({}, settings);
+config.remove('foo'); // delete foo and all sub-keys
+```
+
+#### Using prefix
+```javascript
+var config = new Config({prefix: 'mapilary'});
+config.set('foo', {bar: {baz: 'buzz'}});
 config.get('foo.bar.baz'); // returns buzz
 ```
 
@@ -71,6 +88,11 @@ npm install git://github.com/mapilary/config.git
 ```sh
 npm test
 ```
+
+Version
+----
+
+1.1
 
 License
 ----

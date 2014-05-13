@@ -13,23 +13,39 @@
   }
 }(this, function () {
 
-    var Config = function (storage, settings) {
-        this.storage = storage || {};
-        if (settings) {
-            for (var key in settings) {
-                this.set(key, settings[key]);
-            }
+    /**
+      *  Config constructor
+      *  options: Object
+      *    storage: [Array, locationStorage]
+      *    prefix: (string) custom prefix to be added to each key
+      *
+      *  Warning: direct key has always priority over nested key
+      *  if keys foo.bar and foo both exists only foo will be returned
+      */
+
+    var Config = function (options, settings) {
+        options = options || {};
+        settings = settings || {};
+        this.storage = options.storage || {};
+        this.prefix = options.prefix;
+        for (var key in settings) {
+            this.set(key, settings[key]);
         }
     };
 
     Config.prototype = {
 
         /**
+          *  Get value by key
           *  Allows dot notation eg.:
           *  Config.get('environment.api.basePath');
+          *  If null key provided returns whole prefix (if specified in constructor)
           */
 
         get: function (key) {
+            if (this.prefix) {
+                key = this.prefix + ((key && key.length > 0) ? '.' + key : '');
+            }
             var storage = this.storage,
                 value   = storage[key],
                 isArray = new RegExp('^Array\\((.*)\\);');
@@ -39,9 +55,9 @@
                 for (_key in storage) {
                     if (_key.indexOf(key + '.') === 0) {
                         value = value || {};
-                        var keyValue = storage[_key];
-                        var __key = _key.substr((key.length > 0) ? key.length + 1 : 0);
-                        var keySplit = __key.split('.');
+                        var keyValue = storage[_key],
+                            __key = _key.substr((key.length > 0) ? key.length + 1 : 0),
+                            keySplit = __key.split('.');
                         (function flattenKeys (keys, value) {
                             var key = keys.shift();
                             while (keys.constructor === Array && keys.length > 0) {
@@ -63,9 +79,16 @@
             return value;
         },
 
+        /**
+          *  Set value for key
+          *  Allows dot notation eg.:
+          *  config.set('environment.api.basePath', 'http://someurl');
+          */
+
         set: function (key, value) {
-            var storage = this.storage;
-            var isEmptyObject = this._isEmptyObject;
+            key = (this.prefix) ? this.prefix + '.' + key : key;
+            var storage = this.storage,
+                isEmptyObject = this._isEmptyObject;
             (function expandKeys(key, value) {
                 if (value && value.constructor === Array) {
                     value = 'Array(' + JSON.stringify(value) + ');';
@@ -84,8 +107,26 @@
             })(key, value);
         },
 
+        /**
+          *  Remove (delete) key and all sub keys
+          *  all keys with prefix can be removed when key === prefix
+          */
+
         remove: function (key) {
-            delete this.storage[key];
+            if (this.prefix && key !== this.prefix) {
+                key = this.prefix + ((key && key.length > 0) ? '.' + key : '');
+            }
+            var storage = this.storage;
+            if (typeof storage[key] === 'undefined') {
+                var _key;
+                for (_key in storage) {
+                    if (_key.indexOf(key + '.') === 0) {
+                        delete storage[_key];
+                    }
+                }
+            } else {
+                delete storage[key];
+            }
         },
 
         _isEmptyObject: function (obj) {
