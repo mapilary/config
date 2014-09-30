@@ -102,6 +102,8 @@
           * Config.set('environment.api.basePath', 'http://someurl');
           * is same as:
           * Config.set('environment', {api: {basePath: 'http://someurl'}});
+          * and same as:
+          * Config.set({environment: {api: {basePath: 'http://someurl'}}});
           *
           *  @this {Config}
           *  @param {string} key
@@ -109,9 +111,8 @@
           */
 
         set: function (key, value) {
-            key = (this.ns) ? this.ns + '.' + key : key;
-            var storage = this.storage;
-            (function expandKeys (key, value) {
+            var _key, storage = this.storage;
+            var expandKeys = function (key, value) {
                 var _key, _val = value;
                 if (_val && _val.constructor === Array) {
                     //noop
@@ -124,7 +125,16 @@
                     }
                 }
                 storage[key] = JSON.stringify(_val);
-            })(key, value);
+            };
+            if (typeof value !== 'undefined') {
+                key = (this.ns) ? this.ns + '.' + key : key;
+                return expandKeys(key, value);
+            }
+            for (_key in key) {
+                if (key.hasOwnProperty(_key)) {
+                    expandKeys(_key, key[_key]);
+                }
+            }
         },
 
 

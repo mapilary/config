@@ -67,6 +67,18 @@ describe('Basic test suite', function() {
         expect(config.storage['foo.bar']).toBeDefined();
     });
 
+    it('should set object', function() {
+        var config = new Config();
+        config.set({foo: {bar: 'baz'}});
+        expect(config.get()).toEqual({foo: {bar: 'baz'}});
+    });
+
+    it('should set object with null values', function() {
+        var config = new Config();
+        config.set({foo: {bar: 'baz'}, bar: null});
+        expect(config.get()).toEqual({foo: {bar: 'baz'}, bar: null});
+    });
+
     it('should return all keys', function() {
         var config = new Config();
         config.set('foo.bar', 'baz');

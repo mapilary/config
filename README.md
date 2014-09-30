@@ -53,6 +53,13 @@ var config = new Config({}, {foo: {bar: 'buzz'}});
 config.get('foo.bar'); // returns buzz
 ```
 
+#### Setting as object
+```javascript
+var config = new Config();
+config.set({foo: {bar: 'baz'}});
+config.get('foo'); // returns {bar: 'baz'}
+```
+
 #### Return sub key as object
 ```javascript
 var config = new Config();
