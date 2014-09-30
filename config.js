@@ -111,7 +111,7 @@
           */
 
         set: function (key, value) {
-            var _key, storage = this.storage;
+            var _key, __key, storage = this.storage;
             var expandKeys = function (key, value) {
                 var _key, _val = value;
                 if (_val && _val.constructor === Array) {
@@ -131,8 +131,9 @@
                 return expandKeys(key, value);
             }
             for (_key in key) {
+                __key = (this.ns) ? this.ns + '.' + _key : _key;
                 if (key.hasOwnProperty(_key)) {
-                    expandKeys(_key, key[_key]);
+                    expandKeys(__key, key[_key]);
                 }
             }
         },

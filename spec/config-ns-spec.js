@@ -71,6 +71,12 @@ describe('Namespace test suite', function() {
         expect(config.storage['mapilary.foo.bar']).toBeDefined();
     });
 
+    it('should set object', function() {
+        var config = new Config({namespace: 'mapilary'});
+        config.set({foo: {bar: 'baz'}});
+        expect(config.get()).toEqual({foo: {bar: 'baz'}});
+    });
+
     it('should return value using dot key semantics', function() {
         var config = new Config({namespace: 'mapilary'});
         config.set('foo.bar', 'baz');
