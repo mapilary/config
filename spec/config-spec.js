@@ -10,13 +10,13 @@ describe('Basic test suite', function() {
     it('should set value as string', function() {
         var config = new Config();
         config.set('foo', 'bar');
-        expect(config.storage.foo).toBe('bar');
+        expect(config.get('foo')).toBe('bar');
     });
 
     it('should set value as number', function() {
         var config = new Config();
         config.set('foo', 3.141592653589793);
-        expect(config.storage.foo).toBe(3.141592653589793);
+        expect(config.get('foo')).toBe(3.141592653589793);
     });
 
     it('should set value as array', function() {
@@ -35,7 +35,8 @@ describe('Basic test suite', function() {
     it('should set key with null object', function() {
         var config = new Config();
         config.set('foo', null);
-        expect(config.storage.foo).toBeNull();
+        expect(config.storage['foo']).toBeDefined();
+        expect(config.get('foo')).toBeNull();
     });
 
     it('should set key with empty object', function() {
@@ -50,12 +51,12 @@ describe('Basic test suite', function() {
         expect(config.get('foo')).toEqual({bar: {}});
     });
 
-    it('should set values using settings in constructor', function() {
+    it('should set keys from constructor', function() {
         var config = new Config({}, {foo: 'bar'});
-        expect(config.storage.foo).toBe('bar');
+        expect(config.get('foo')).toBe('bar');
     });
 
-    it('should get complex values using settings in constructor', function() {
+    it('should return value set by constructor', function() {
         var config = new Config({}, {foo: {bar: 'baz'}});
         expect(config.get('foo.bar')).toBe('baz');
     });
@@ -64,6 +65,13 @@ describe('Basic test suite', function() {
         var config = new Config();
         config.set('foo', {bar: 'baz'});
         expect(config.storage['foo.bar']).toBeDefined();
+    });
+
+    it('should return all keys', function() {
+        var config = new Config();
+        config.set('foo.bar', 'baz');
+        config.set('bar.bar', 'baz');
+        expect(config.get()).toEqual({foo: {bar: 'baz'}, bar: {bar: 'baz'}});
     });
 
     it('should return value using dot key semantics', function() {
@@ -112,7 +120,8 @@ describe('Basic test suite', function() {
         config.set('foo.bar', 'buz');
         config.set('foo.baz', 'buzz');
         config.remove('foo');
-        expect(config.storage.foo).toBeUndefined();
+        expect(config.get('foo')).toBeUndefined();
+        expect(config.storage).toEqual({});
     });
 
     it('should remove sub key', function() {
@@ -123,4 +132,28 @@ describe('Basic test suite', function() {
         expect(config.get('foo')).toEqual({baz: 'buzz'});
     });
 
+    it('should not remove any key', function() {
+        var config = new Config();
+        config.set('foo.bar', 'buz');
+        config.set('foo.baz', 'buzz');
+        config.remove();
+        expect(config.get()).toEqual({foo: {bar: 'buz', baz: 'buzz'}});
+    });
+
+    it('should not remove sibling key', function() {
+        var config = new Config();
+        config.set('bar', 'buz');
+        config.set('foo.bar', 'buz');
+        config.set('foo.baz', 'buzz');
+        config.remove('foo');
+        expect(config.get()).toEqual({bar: 'buz'});
+    });
+
+    it('should remove all keys', function() {
+        var config = new Config();
+        config.set('foo.bar', 'buz');
+        config.set('foo.baz', 'buzz');
+        config.clear();
+        expect(config.storage).toEqual({});
+    });
 });

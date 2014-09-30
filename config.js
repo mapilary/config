@@ -13,126 +13,165 @@
   }
 }(this, function () {
 
+    var isEmptyObject = function (obj) {
+        var name;
+        for (name in obj) return false;
+        return true;
+    };
+
     /**
-      *  Config constructor
-      *  options: Object
-      *    storage: [Array, locationStorage]
-      *    prefix: (string) custom prefix to be added to each key
+      *  Create an instance of Config
       *
-      *  Warning: direct key has always priority over nested key
+      *  When not specified by options.storage hashmap will be
+      *  used for storing data.
+      *
+      *  Notice: direct key has always priority over nested key
       *  if keys foo.bar and foo both exists only foo will be returned
+      *
+      *  @consructor
+      *  @this {Config}
+      *  @param {Object} [options]
+      *  @param {Object} options.storage - data store ({}, localStorage, ...)
+      *  @param {string} options.namespace - optional prefix for all keys
+      *  @param {Object} [data] - initial dataset
       */
 
-    var Config = function (options, settings) {
+    var Config = function (options, data) {
+        var key;
         options = options || {};
-        settings = settings || {};
+        data = data || {};
         this.storage = options.storage || {};
-        this.prefix = options.prefix;
-        for (var key in settings) {
-            this.set(key, settings[key]);
+        this.ns = options.namespace || options.prefix || '';
+        if (options.prefix) {
+            console.log('Using prefix is deprecated. Use namespace instead.');
+        }
+        for (key in data) {
+            this.set(key, data[key]);
         }
     };
 
     Config.prototype = {
 
         /**
-          *  Get value by key
-          *  Allows dot notation eg.:
-          *  Config.get('environment.api.basePath');
-          *  If null key provided returns whole prefix (if specified in constructor)
+          * Get value for key using dot notation
+          *
+          * Config.get('environment.api.basePath');
+          * If null key provided returns all key/values within namespace
+          *
+          *  @this {Config}
+          *  @param {string} [key]
+          *  @return {Number|String|Object|Array} value
           */
 
         get: function (key) {
-            if (this.prefix) {
-                key = this.prefix + ((key && key.length > 0) ? '.' + key : '');
+            key = key || '';
+            if (this.ns) {
+                key = this.ns + ((key && key.length > 0) ? '.' + key : '');
             }
             var storage = this.storage,
-                value   = storage[key],
-                isArray = new RegExp('^Array\\((.*)\\);');
-            if (typeof value === 'undefined') {
-                var _key;
-                //recursively search for key
-                for (_key in storage) {
-                    if (_key.indexOf(key + '.') === 0) {
-                        value = value || {};
-                        var keyValue = storage[_key],
-                            __key = _key.substr((key.length > 0) ? key.length + 1 : 0),
-                            keySplit = __key.split('.');
-                        (function flattenKeys (keys, value) {
-                            var key = keys.shift();
-                            while (keys.constructor === Array && keys.length > 0) {
-                                value[key] = value[key] || {};
-                                return flattenKeys(keys, value[key]);
-                            }
-                            keyValue = (keyValue === '{}') ? {} : keyValue;
-                            var arrayVal = isArray.exec(keyValue);
-                            keyValue = arrayVal ? JSON.parse(arrayVal[1]) : keyValue;
-                            value[key] = keyValue;
-                        })(keySplit, value);
-                    }
+                value   = storage[key];
+            if (value) {
+                return JSON.parse(value);
+            }
+            var _key;
+            var flattenKeys = function (keys, value) {
+                var key = keys.shift();
+                while (keys.constructor === Array && keys.length > 0) {
+                    value[key] = value[key] || {};
+                    return flattenKeys(keys, value[key]);
                 }
-            } else {
-                value = (value === '{}') ? {} : value;
-                var arrayVal = isArray.exec(value);
-                value = arrayVal ? JSON.parse(arrayVal[1]) : value;
+                value[key] = JSON.parse(keyValue);
+            };
+            //recursively search for key
+            for (_key in storage) {
+                if (!key || _key.indexOf(key + '.') === 0) {
+                    value = value || {};
+                    var keyValue = storage[_key],
+                        __key = _key.substr((key.length > 0) ? key.length + 1 : 0),
+                        keySplit = __key.split('.');
+                    flattenKeys(keySplit, value);
+                }
             }
             return value;
         },
 
         /**
-          *  Set value for key
-          *  Allows dot notation eg.:
-          *  config.set('environment.api.basePath', 'http://someurl');
+          * Set value for key using dot notation
+          *
+          * Value object is automatically flattened (expanded)
+          * Config.set('environment.api.basePath', 'http://someurl');
+          * is same as:
+          * Config.set('environment', {api: {basePath: 'http://someurl'}});
+          *
+          *  @this {Config}
+          *  @param {string} key
+          *  @param {Number|String|Object|Array} value
           */
 
         set: function (key, value) {
-            key = (this.prefix) ? this.prefix + '.' + key : key;
-            var storage = this.storage,
-                isEmptyObject = this._isEmptyObject;
-            (function expandKeys(key, value) {
-                if (value && value.constructor === Array) {
-                    value = 'Array(' + JSON.stringify(value) + ');';
-                }
-                else if (value === Object(value)) {
-                    if (!isEmptyObject(value)) {
-                        for (var _key in value) {
-                            expandKeys(key + '.' + _key, value[_key]);
+            key = (this.ns) ? this.ns + '.' + key : key;
+            var storage = this.storage;
+            (function expandKeys (key, value) {
+                var _key, _val = value;
+                if (_val && _val.constructor === Array) {
+                    //noop
+                } else if (_val === Object(_val)) {
+                    if (!isEmptyObject(_val)) {
+                        for (_key in _val) {
+                            expandKeys(key + '.' + _key, _val[_key]);
                         }
                         return;
-                    } else {
-                        value = '{}';
                     }
                 }
-                storage[key] = value;
+                storage[key] = JSON.stringify(_val);
             })(key, value);
         },
 
+
         /**
-          *  Remove (delete) key and all sub keys
-          *  all keys with prefix can be removed when key === prefix
+          * Remove key and all nested keys
+          *
+          *  @this {Config}
+          *  @param {string} key
           */
 
         remove: function (key) {
-            if (this.prefix && key !== this.prefix) {
-                key = this.prefix + ((key && key.length > 0) ? '.' + key : '');
+            var _key, storage = this.storage;
+            if (!key) {
+                return;
             }
-            var storage = this.storage;
-            if (typeof storage[key] === 'undefined') {
-                var _key;
-                for (_key in storage) {
-                    if (_key.indexOf(key + '.') === 0) {
-                        delete storage[_key];
-                    }
-                }
-            } else {
+            if (key === this.ns) {
+                console.log('Removing prefix is deprecated. Use clear instead.');
+                return this.clear();
+            }
+            if (this.ns) {
+                key = this.ns + '.' + key;
+            }
+            if (storage[key]) {
                 delete storage[key];
+                return;
+            }
+            // remove all nested keys
+            for (_key in storage) {
+                if (_key.indexOf(key) === 0) {
+                    delete storage[_key];
+                }
             }
         },
 
-        _isEmptyObject: function (obj) {
-            var name;
-            for (name in obj) return false;
-            return true;
+
+        /**
+          * Remove all keys within namespace
+          *
+          */
+
+        clear: function () {
+            var _key, storage = this.storage;
+            for (_key in storage) {
+                if (_key.indexOf(this.ns) === 0) {
+                    delete storage[_key];
+                }
+            }
         }
     };
 

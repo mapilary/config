@@ -1,7 +1,7 @@
 {
   "name": "config",
   "description": "Config class allowing expanded dot key style access",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "config.js",
   "license": "MIT",
   "authors": [

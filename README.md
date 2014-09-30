@@ -24,6 +24,13 @@ For using Config in Browser include script in html header or use as RequireJS mo
 Changelog
 ---------
 
+1.2
+===
+* fixing unintentional remove bug
+* new method clear
+* deprecating prefix in favour of namespace
+* deprecating remove(namespace) in favour of clear method
+
 1.1
 ===
 * constructor now accepts options object and settings object
@@ -40,6 +47,12 @@ config.set('foo', {bar: {baz: 'buzz'}});
 config.get('foo.bar.baz'); // returns buzz
 ```
 
+#### Setting data in constructor
+```javascript
+var config = new Config({}, {foo: {bar: 'buzz'}});
+config.get('foo.bar'); // returns buzz
+```
+
 #### Return sub key as object
 ```javascript
 var config = new Config();
@@ -54,13 +67,6 @@ config.set('foo', {bar: {baz: 'buzz'}});
 config.get('foo.bar.baz'); // returns buzz
 ```
 
-#### Using initial settings object to configure Config
-```javascript
-var settings = {foo: {bar: {baz: 'buzz'}}};
-var config = new Config({}, settings);
-config.get('foo.bar.baz'); // returns buzz
-```
-
 #### Remove key(s)
 ```javascript
 var settings = {foo: {bar: {baz: 'buzz'}}};
@@ -68,11 +74,12 @@ var config = new Config({}, settings);
 config.remove('foo'); // delete foo and all sub-keys
 ```
 
-#### Using prefix
+#### Using namespaces
 ```javascript
-var config = new Config({prefix: 'mapilary'});
+var config = new Config({namespace: 'mapilary'});
 config.set('foo', {bar: {baz: 'buzz'}});
 config.get('foo.bar.baz'); // returns buzz
+config.clear(); //remove all keys from namespace
 ```
 
 Installation
